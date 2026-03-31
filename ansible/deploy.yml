@@ -1,0 +1,12 @@
+- hosts: web
+  become: yes
+
+  tasks:
+    - name: Run FastAPI container
+      docker_container:
+        name: fastapi-app
+        image: james2835/fastapi-app:latest
+        state: started
+        ports:
+          - "80:80"
+        restart_policy: always
