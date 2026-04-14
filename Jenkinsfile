@@ -9,13 +9,25 @@ pipeline {
 
         stage('Setup Server') {
             steps {
-                sh 'ansible-playbook -i ansible/inventory.ini ansible/setup.yml'
+                withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
+                    sh '''
+                    echo $VAULT_PASS > vault_pass.txt
+                    ansible-playbook -i ansible/inventory.ini ansible/setup.yml --vault-password-file vault_pass.txt
+                    '''
+                }
             }
         }
 
         stage('Deploy App') {
             steps {
-                sh "ansible-playbook -i ansible/inventory.ini ansible/deploy.yml --extra-vars 'image_tag=${params.IMAGE_TAG}'"
+                withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
+                    sh '''
+                    echo $VAULT_PASS > vault_pass.txt
+                    ansible-playbook -i ansible/inventory.ini ansible/deploy.yml \
+                    --vault-password-file vault_pass.txt \
+                    --extra-vars "image_tag=${IMAGE_TAG}"
+                    '''
+                }
             }
         }
 
