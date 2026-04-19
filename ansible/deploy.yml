@@ -1,12 +1,16 @@
 - hosts: web
   become: yes
 
+  vars:
+    image_tag: latest   # default (overridden by Jenkins)
+
   tasks:
-    - name: Run FastAPI container
+
+    - name: Pull Docker image
       docker_container:
         name: fastapi-app
         image: "james2835/fastapi-app:{{ image_tag }}"
         state: started
+        restart_policy: always
         ports:
           - "80:80"
-        restart_policy: always
