@@ -18,9 +18,10 @@ pipeline {
                     echo "New EC2 IP: ${ip}"
 
                     writeFile file: 'ansible/inventory.ini', text: """[web]
-${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
+${ip} ansible_user=ec2-user ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
 """
 
+                    // wait for EC2 to be ready for SSH
                     sleep(time: 30, unit: 'SECONDS')
                 }
             }
