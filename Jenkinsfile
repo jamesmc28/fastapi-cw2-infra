@@ -9,48 +9,23 @@ pipeline {
 
         stage('Provision EC2') {
             steps {
-                script {
-                    def ip = sh(
-                        script: '''ansible-playbook ansible/provision_ec2.yml | grep "EC2 Public IP" | awk '{print $NF}' | tr -d '"' ''',
-                        returnStdout: true
-                    ).trim()
-
-                    echo "New EC2 IP: ${ip}"
-
-                    writeFile file: 'ansible/inventory.ini', text: """[web]
-${ip} ansible_user=ec2-user ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
-"""
-
-                    sleep(time: 30, unit: 'SECONDS')
-                }
+                // your existing code
             }
         }
 
         stage('Setup Server') {
             steps {
-                withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
-                    sh '''
-                    echo $VAULT_PASS > vault_pass.txt
-                    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/setup.yml \
-                    --vault-password-file vault_pass.txt
-                    '''
-                }
+                // your existing code
             }
         }
 
         stage('Deploy App') {
             steps {
-                withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
-                    sh '''
-                    echo $VAULT_PASS > vault_pass.txt
-                    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/deploy.yml \
-                    --vault-password-file vault_pass.txt \
-                    --extra-vars "image_tag=${IMAGE_TAG}"
-                    '''
-                }
+                // your existing code
             }
         }
 
+        //)
         stage('Health Check') {
             steps {
                 sh '''
@@ -58,14 +33,17 @@ ${ip} ansible_user=ec2-user ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/D
 
                 echo "Waiting for app to become available..."
 
-                for i in {1..10}
+                i=1
+                while [ $i -le 10 ]
                 do
                     if curl -f http://$IP; then
                         echo "App is up!"
                         exit 0
                     fi
-                    echo "Retrying..."
+
+                    echo "Retrying... ($i)"
                     sleep 5
+                    i=$((i+1))
                 done
 
                 echo "App failed to start"
