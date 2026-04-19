@@ -29,7 +29,7 @@ ${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Dev
                 withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
                     sh '''
                     echo $VAULT_PASS > vault_pass.txt
-                    ansible-playbook -i ansible/inventory.ini ansible/setup.yml \
+                    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/setup.yml \
                     --vault-password-file vault_pass.txt
                     '''
                 }
@@ -41,7 +41,7 @@ ${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Dev
                 withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
                     sh '''
                     echo $VAULT_PASS > vault_pass.txt
-                    ansible-playbook -i ansible/inventory.ini ansible/deploy.yml \
+                    ANSIBLE_HOST_KEY_CHECKING=False ansible-playbook -i ansible/inventory.ini ansible/deploy.yml \
                     --vault-password-file vault_pass.txt \
                     --extra-vars "image_tag=${IMAGE_TAG}"
                     '''
