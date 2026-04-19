@@ -8,10 +8,19 @@
         name: "*"
         state: latest
 
-    - name: Install Docker
+    - name: Install required packages
       yum:
-        name: docker
+        name:
+          - docker
+          - python3
+          - python3-pip
         state: present
+
+    - name: Install Python Docker SDK + requests
+      pip:
+        name:
+          - docker
+          - requests
 
     - name: Start Docker
       service:
@@ -25,7 +34,7 @@
         groups: docker
         append: yes
 
-    - name: Restart Docker (ensure group applied)
+    - name: Restart Docker
       service:
         name: docker
         state: restarted
