@@ -11,7 +11,7 @@ pipeline {
             steps {
                 script {
                     def ip = sh(
-                        script: "ansible-playbook ansible/provision_ec2.yml | grep 'EC2 Public IP' | awk '{print \\$NF}' | tr -d '\"'",
+                        script: '''ansible-playbook ansible/provision_ec2.yml | grep "EC2 Public IP" | awk '{print $NF}' | tr -d '"' ''',
                         returnStdout: true
                     ).trim()
 
