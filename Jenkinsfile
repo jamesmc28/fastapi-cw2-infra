@@ -1,3 +1,21 @@
+stage('Provision EC2') {
+    steps {
+        script {
+            def ip = sh(
+                script: "ansible-playbook ansible/provision_ec2.yml | grep 'EC2 Public IP' | awk '{print \$NF}'",
+                returnStdout: true
+            ).trim()
+
+            echo "New EC2 IP: ${ip}"
+
+            writeFile file: 'ansible/inventory.ini', text: """
+[web]
+${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
+"""
+        }
+    }
+}
+
 pipeline {
     agent any
 
