@@ -2,11 +2,11 @@
   become: yes
 
   vars:
-    image_tag: latest   # default (overridden by Jenkins)
+    image_tag: latest
 
   tasks:
 
-    - name: Pull Docker image
+    - name: Run FastAPI container
       docker_container:
         name: fastapi-app
         image: "james2835/fastapi-app:{{ image_tag }}"
