@@ -8,7 +8,7 @@
         name: "*"
         state: latest
 
-    - name: Install required packages
+    - name: Install required system packages
       yum:
         name:
           - docker
@@ -16,13 +16,14 @@
           - python3-pip
         state: present
 
-    - name: Install Python Docker SDK + requests
+    - name: Install compatible Python Docker SDK and dependencies
       pip:
         name:
-          - docker
-          - requests
+          - "docker<6"
+          - "requests<2.32"
+          - "urllib3<2"
 
-    - name: Start Docker
+    - name: Start Docker service
       service:
         name: docker
         state: started
@@ -34,7 +35,7 @@
         groups: docker
         append: yes
 
-    - name: Restart Docker
+    - name: Restart Docker to apply changes
       service:
         name: docker
         state: restarted
