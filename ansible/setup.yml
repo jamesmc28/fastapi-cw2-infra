@@ -2,13 +2,14 @@
   become: yes
 
   tasks:
-    - name: Update apt
-      apt:
-        update_cache: yes
+    - name: Update packages
+      yum:
+        name: "*"
+        state: latest
 
     - name: Install Docker
-      apt:
-        name: docker.io
+      yum:
+        name: docker
         state: present
 
     - name: Start Docker
@@ -17,8 +18,8 @@
         state: started
         enabled: yes
 
-    - name: Add ubuntu user to docker group
+    - name: Add ec2-user to docker group
       user:
-        name: ubuntu
+        name: ec2-user
         groups: docker
         append: yes
