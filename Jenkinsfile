@@ -21,7 +21,7 @@ pipeline {
 ${ip} ansible_user=ec2-user ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
 """
 
-                    // wait for EC2 to be ready for SSH
+                    // wait for EC2 to be ready
                     sleep(time: 30, unit: 'SECONDS')
                 }
             }
@@ -56,8 +56,20 @@ ${ip} ansible_user=ec2-user ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/D
             steps {
                 sh '''
                 IP=$(awk 'NR==2 {print $1}' ansible/inventory.ini)
-                echo "Checking app on $IP"
-                curl -f http://$IP
+
+                echo "Waiting for app to become available..."
+
+                for i in {1..10}; do
+                    if curl -f http://$IP; then
+                        echo "App is up!"
+                        exit 0
+                    fi
+                    echo "Retrying..."
+                    sleep 5
+                done
+
+                echo "App failed to start"
+                exit 1
                 '''
             }
         }
