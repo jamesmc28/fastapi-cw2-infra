@@ -11,14 +11,13 @@ pipeline {
             steps {
                 script {
                     def ip = sh(
-                        script: "ansible-playbook ansible/provision_ec2.yml | grep 'EC2 Public IP' | awk '{print \\$NF}'",
+                        script: "ansible-playbook ansible/provision_ec2.yml | grep 'EC2 Public IP' | awk '{print \\$NF}' | tr -d '\"'",
                         returnStdout: true
                     ).trim()
 
                     echo "New EC2 IP: ${ip}"
 
-                    writeFile file: 'ansible/inventory.ini', text: """
-[web]
+                    writeFile file: 'ansible/inventory.ini', text: """[web]
 ${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
 """
                 }
@@ -30,7 +29,8 @@ ${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Dev
                 withCredentials([string(credentialsId: 'ansible-vault-pass', variable: 'VAULT_PASS')]) {
                     sh '''
                     echo $VAULT_PASS > vault_pass.txt
-                    ansible-playbook -i ansible/inventory.ini ansible/setup.yml --vault-password-file vault_pass.txt
+                    ansible-playbook -i ansible/inventory.ini ansible/setup.yml \
+                    --vault-password-file vault_pass.txt
                     '''
                 }
             }
@@ -51,7 +51,11 @@ ${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Dev
 
         stage('Health Check') {
             steps {
-                sh 'curl -f http://$(awk \'NR==2 {print $1}\' ansible/inventory.ini)'
+                sh '''
+                IP=$(awk 'NR==2 {print $1}' ansible/inventory.ini)
+                echo "Checking app on $IP"
+                curl -f http://$IP
+                '''
             }
         }
     }
