@@ -1,21 +1,3 @@
-stage('Provision EC2') {
-    steps {
-        script {
-            def ip = sh(
-                script: "ansible-playbook ansible/provision_ec2.yml | grep 'EC2 Public IP' | awk '{print \$NF}'",
-                returnStdout: true
-            ).trim()
-
-            echo "New EC2 IP: ${ip}"
-
-            writeFile file: 'ansible/inventory.ini', text: """
-[web]
-${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
-"""
-        }
-    }
-}
-
 pipeline {
     agent any
 
@@ -24,6 +6,24 @@ pipeline {
     }
 
     stages {
+
+        stage('Provision EC2') {
+            steps {
+                script {
+                    def ip = sh(
+                        script: "ansible-playbook ansible/provision_ec2.yml | grep 'EC2 Public IP' | awk '{print \$NF}'",
+                        returnStdout: true
+                    ).trim()
+
+                    echo "New EC2 IP: ${ip}"
+
+                    writeFile file: 'ansible/inventory.ini', text: """
+[web]
+${ip} ansible_user=ubuntu ansible_ssh_private_key_file=/var/lib/jenkins/.ssh/Devops2.pem
+"""
+                }
+            }
+        }
 
         stage('Setup Server') {
             steps {
@@ -51,7 +51,7 @@ pipeline {
 
         stage('Health Check') {
             steps {
-                sh 'curl -f http://3.214.77.225'
+                sh 'curl -f http://$(awk \'NR==2 {print $1}\' ansible/inventory.ini)'
             }
         }
     }
