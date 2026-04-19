@@ -3,6 +3,9 @@
 
   tasks:
 
+    - name: Wait for cloud-init to finish
+      shell: cloud-init status --wait
+
     - name: Update packages
       yum:
         name: "*"
