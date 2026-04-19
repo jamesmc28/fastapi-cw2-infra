@@ -2,6 +2,7 @@
   become: yes
 
   tasks:
+
     - name: Update packages
       yum:
         name: "*"
@@ -23,3 +24,8 @@
         name: ec2-user
         groups: docker
         append: yes
+
+    - name: Restart Docker (ensure group applied)
+      service:
+        name: docker
+        state: restarted
