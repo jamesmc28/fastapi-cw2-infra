@@ -1,0 +1,42 @@
+- name: Provision EC2 instance
+  hosts: localhost
+  connection: local
+  gather_facts: no
+
+  vars:
+    region: us-east-1
+    instance_type: t2.micro
+    ami_id: ami-0c02fb55956c7d316
+    key_name: Devops2
+    security_group: fastapi-sg
+
+  tasks:
+
+    - name: Create security group
+      amazon.aws.ec2_group:
+        name: "{{ security_group }}"
+        description: Allow HTTP and SSH
+        region: "{{ region }}"
+        rules:
+          - proto: tcp
+            ports: 22
+            cidr_ip: 0.0.0.0/0
+          - proto: tcp
+            ports: 80
+            cidr_ip: 0.0.0.0/0
+
+    - name: Launch EC2 instance
+      amazon.aws.ec2_instance:
+        name: fastapi-instance
+        key_name: "{{ key_name }}"
+        instance_type: "{{ instance_type }}"
+        image_id: "{{ ami_id }}"
+        wait: yes
+        region: "{{ region }}"
+        security_groups: ["{{ security_group }}"]
+
+      register: ec2_output
+
+    - name: Show public IP
+      debug:
+        msg: "EC2 Public IP: {{ ec2_output.instances[0].public_ip_address }}"
