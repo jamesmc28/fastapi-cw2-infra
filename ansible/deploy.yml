@@ -5,7 +5,7 @@
     - name: Run FastAPI container
       docker_container:
         name: fastapi-app
-        image: james2835/fastapi-app:latest
+        image: "james2835/fastapi-app:{{ image_tag }}"
         state: started
         ports:
           - "80:80"
